@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Departments Page</title>
+</head>
+<body>
+    <h1>Departments</h1>
+    <table border="1">
+        <tr>
+            <th>DID</th>
+            <th>Name</th>
+            <th>Budget</th>
+            <th>Location</th>
+            <th>Delete</th>
+        </tr>
+        <%
+        data.forEach(function(data){
+        %>
+        <tr>
+            <td><%=data.did %></td>
+            <td><%=data.dname %></td>
+            <td><%=data.budget %></td>
+            <td><%=data.county %></td>
+            <td><a href=depts/delete/<%= data.did %>>Delete</a></td>
+        </tr>
+        <% }) %>
+    </table>
+    <a href="/">Home</a>
+</body>
+</html>

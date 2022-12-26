@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Employee (MongoDB)</title>
+</head>
+<body>
+    <h1>Edit Employee</h1>
+    <ul>
+    <%
+        if (data) {
+            data.forEach(function(error){
+        %>
+        
+            <li><%= error %></li>
+        
+        <% })} %>
+    </ul>
+    <form method="POST">
+        <label>EID</label>
+        <input type="text" class="form-control" id="eid" name="eid"/><br/>
+        <label>Phone</label>
+        <input type="text" class="form-control" id="phone" name="phone"/><br/>
+        <label>Email</label>
+        <input type="text" class="form-control" id ="email" name="email"/>
+        <input type="submit" value="Add"/>
+    </form>
+    <a href="/">Home</a>
+</body>
+</html>

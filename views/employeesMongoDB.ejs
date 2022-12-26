@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Employees Page (MongoDB)</title>
+</head>
+<body>
+    <h1>Employees</h1>
+    <a href="/employeesMongoDB/add">Add Employee (MongoDB)</a>
+    <table border="1">
+        <tr>
+            <th>EID</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+        <%
+        data.forEach(function(data){
+        %>
+        <tr>
+            <td><%=data._id %></td>
+            <td><%=data.phone %></td>
+            <td><%=data.email %></td>
+        </tr>
+        <% }) %>
+    </table>
+    <a href="/">Home</a>
+</body>
+</html>

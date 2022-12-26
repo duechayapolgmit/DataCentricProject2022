@@ -1,57 +1,225 @@
-/* BASIC INFO */
-var express = require('express');
-var app = express();
+/* BASIC IMPORT */
+const express = require('express');
+const cors = require('cors');
+const ejs = require('ejs');
+const path = require('path');
+const bodyParser = require('body-parser');
+const database = require('./database');
+const databaseDB = require('./databaseDB');
+const { reset } = require('nodemon');
+
+/* EXPRESS SETUP */
+const app = express();
 var port = 3004;
-var pmysql = require('promise-mysql')
 
-/* CONNECTION POOL FOR MYSQL */
-pmysql.createPool({
-    connectionLimit: 3,
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'proj2022'
-})
-    .then(p => {
-        pool = p
-    })
-    .catch(e=>{
-        console.log("pool error: "+e)
-})
+/* BODY PARSER */
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
+/* CORS */
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers",
+  "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+// Home page
 app.get('/', (req,res) => {
-    pool.query('SELECT * FROM employee')
-        .then((data)=>{
-            console.log(data)
-        })
-        .catch(error => {
-            console.log(error);
-        })
+  let html = "<html><body><a href=\"/employees\">Employees</a><br/>";
+  html += "<a href=\"/depts\">Departments</a><br/>";
+  html += "<a href=\"/employeesMongoDB\">Employees (MongoDB)</a><br/></html>";
+  res.send(html)
 })
 
-const MongoClient = require('mongodb').MongoClient
+/* MYSQL */
+// GET /employees - show all employee's details
+app.get('/employees', (req,res) => {
+  database.getEmployees()
+    .then(data => {
+      let html = ejs.renderFile('views/employees.ejs', {data: data}, function(err,str){
+        res.send(str);
+      });
+      
+    })
+    .catch(error=>{
+      console.log("Error: "+error);
+    })
+})
 
-// Connect URL
-const url = 'mongodb://127.0.0.1:27017'
+// GET /employees/edit/:eid - edit employee's details
+app.get('/employees/edit/:eid', (req,res) => {
+  database.getEmployee(req.params.eid)
+    .then(data => {
+      let html = ejs.renderFile('views/employeesEdit.ejs', {data: data}, function (err,str){
+        res.send(str);
+      });
+    })
+    .catch(error=>{
+      console.log("Error "+error);
+    })
+})
 
-// Connect to MongoDB
-MongoClient.connect(
-  url,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  },
-  (err, client) => {
-    if (err) {
-      return console.log(err)
-    }
+// POST /employees/edit/:eid - post results
+app.post('/employees/edit/:eid', (req, res) => {
+  let eid = req.body.eid;
+  let name = req.body.ename;
+  let role = req.body.role;
+  let salary = req.body.salary;
 
-    // Specify the database you want to access
-    const db = client.db('employeesDB')
+  let errorMsg = [];
+  // Check name length - more than 5 chars
+  if (name.length < 5) errorMsg.push("Employee name must be at least 5 characters");
+  // Check role - only Manager or Employee
+  if (!(role == "Manager") && !(role == "Employee")) errorMsg.push("Role can be either Manager or Employee");
+  // Check salary - more than 0
+  if (salary < 0) errorMsg.push("Salary must be > 0");
 
-    console.log(`MongoDB Connected: ${url}`)
+  // Send back the form if there's an error message
+  if (errorMsg.length > 0){
+    database.getEmployee(eid)
+      .then(data => {
+        data.errorMsg = errorMsg;
+        let html = ejs.renderFile('views/employeesEdit.ejs', {data: data}, function (err,str){
+          res.send(str);
+        });
+      })
+      .catch(error=>{
+        console.log("Error "+error);
+      })
+  } else {
+    console.log('success')
+    database.setEmployee(eid, name, role, salary)
+      .then(
+        res.redirect('/employees')
+      )
+      .catch(error=>{
+        console.log("Error "+error);
+      })
+  }
+})
+
+// GET /depts - show all department's details
+app.get('/depts', (req,res) => {
+  database.getDepartments()
+    .then(data => {
+      let html = ejs.renderFile('views/departments.ejs', {data: data}, function(err,str){
+        res.send(str);
+      });
+      
+    })
+    .catch(error=>{
+      console.log("Error: "+error);
+    })
+})
+
+// GET /depts/delete/:did - delete department
+app.get('/depts/delete/:did', (req, res) => {
+  database.deleteDepartment(req.params.did)
+    .then(data => {
+      res.redirect('/depts');
+    })
+    .catch(error=>{
+      let html = ejs.renderFile('views/departmentsDeleteError.ejs', {data: req.params.did}, function(err, str){
+        res.send(str);
+      })
+    })
   }
 )
+
+/* MONGODB */
+
+// GET /employeesMongoDB - display all employees in MongoDB
+app.get('/employeesMongoDB', (req, res) => {
+  databaseDB.findAll()
+    .then(data => {
+      let html = ejs.renderFile('views/employeesMongoDB.ejs', {data: data}, function(err, str){
+        res.send(str);
+      })
+    })
+    .catch(error => {
+      console.log(error)
+    })
+})
+
+// GET /employeesMongoDB/add - add an employee in MongoDB (if exists in MySQL)
+app.get('/employeesMongoDB/add', (req, res) => {
+  data = [];
+  let html = ejs.renderFile('views/employeesMongoDB_Add.ejs', {data: data}, function(err, str){
+    res.send(str);
+  })
+})
+
+app.post('/employeesMongoDB/add', (req,res) => {
+  let eid = req.body.eid;
+  let phone = req.body.phone;
+  let email = req.body.email;
+
+  let errorMsg = [];
+  // if eid is not exactly 4 characters
+  if (eid.length != 4) errorMsg.push("EID must be 4 characters");
+  // if phone numebr is not more than 5 chracters
+  if (phone.length < 5) errorMsg.push("Phone must be >5 characters");
+  // check if @ and . exists or not
+  if (!email.includes("@") || !email.includes(".")) errorMsg.push("Email must be a valid email address (@ and . included)");
+
+  if (errorMsg.length > 0){
+    let html = ejs.renderFile('views/employeesMongoDB_Add.ejs', {data: errorMsg}, function (err,str){
+      res.send(str);
+      return;
+    });
+  } else {
+    // for processing mysql and mongoDB EIDs
+  let sqlEID = [];
+  let mongoDBEID = [];
+
+    // ACCESS ALL EID FROM MYSQL
+    database.getEID()
+      .then(data => {
+        data.forEach(element => {
+          sqlEID.push(element.eid);
+        });  
+      })
+      .then(data => {
+        // ACCESS ALL EID FROM MONGODB
+        databaseDB.findAllEID()
+          .then(data => {
+            data.forEach(element => {
+              mongoDBEID.push(element._id)
+            })
+            // CHECK IF EMPLOYEE IN MONGODB
+            if (mongoDBEID.indexOf(eid) > -1) {
+              let dataError = "Error: EID "+eid+" already exists in MongoDB";
+              let html = ejs.renderFile('views/employeesMongoDB_AddError.ejs', {data: dataError}, function(err, str){
+                res.send(str);
+              })
+              return;
+            }
+            // CHECK IF EMPLOYEE NOT IN MYSQL
+            if (sqlEID.indexOf(eid) == -1){
+              let dataError = "Employee "+eid+" doesn't exist in MySQL DB";
+              let html = ejs.renderFile('views/employeesMongoDB_AddError.ejs', {data: dataError}, function(err, str){
+                res.send(str);
+              })
+              return;
+            }
+            databaseDB.insertNew(eid, phone, email);
+            res.redirect('/employeesMongoDB');
+          }
+          )
+      }
+      )
+
+    /*
+    databaseDB.findAllEID()
+      .then(data => {
+        sqlEID = data;
+      })
+    console.log(sqlEID);*/
+    
+  }
+})
 
 app.listen(port, () => {
     console.log("reading on port "+port);

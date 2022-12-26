@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Employees Page</title>
+</head>
+<body>
+    <h1>Employees</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Salary</th>
+            <th>Update</th>
+        </tr>
+        <%
+        data.forEach(function(data){
+        %>
+        <tr>
+            <td><%=data.eid %></td>
+            <td><%=data.ename %></td>
+            <td><%=data.role %></td>
+            <td><%=data.salary %></td>
+            <td><a href=employees/edit/<%= data.eid %>>Update</a></td>
+        </tr>
+        <% }) %>
+    </table>
+    <a href="/">Home</a>
+</body>
+</html>

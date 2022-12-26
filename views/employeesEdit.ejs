@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Employee</title>
+</head>
+<body>
+    <h1>Edit Employee</h1>
+    <ul>
+    <%
+        if (data.errorMsg) {
+            data.errorMsg.forEach(function(error){
+        %>
+        
+            <li><%= error %></li>
+        
+        <% })} %>
+    </ul>
+    <form method="POST">
+        <label>EID</label>
+        <input type="text" class="form-control" id="eid" name="eid" readonly value=<%= data[0].eid %>></input><br/>
+        <label>Name</label>
+        <input type="text" class="form-control" id="ename" name="ename" value=<%= data[0].ename %>></input><br/>
+        <label>Role</label>
+        <input type="text" class="form-control" id ="role" name="role" value=<%= data[0].role %>></input><br/>
+        <label>Salary</label>
+        <input type="text" class="form-control" id="salary" name="salary" value=<%= data[0].salary %>></input><br/>
+        <input type="submit" value="Update"/>
+    </form>
+    <a href="/">Home</a>
+</body>
+</html>
