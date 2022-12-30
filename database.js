@@ -89,6 +89,7 @@ module.exports = {
                 })
         })
     },
+    // Delete department 
     deleteDepartment: function(did){
         return new Promise((resolve, reject) => {
             pool.query('DELETE FROM dept WHERE did='+pmysql.escape(did))
