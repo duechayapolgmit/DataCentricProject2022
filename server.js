@@ -227,6 +227,7 @@ app.get('/employeesMongoDB/add', (req, res) => {
   })
 })
 
+// POST /employeesMongoDB/add - add an employee to MongoDB
 app.post('/employeesMongoDB/add', (req,res) => {
   let eid = req.body.eid;
   let phone = req.body.phone;
@@ -286,14 +287,52 @@ app.post('/employeesMongoDB/add', (req,res) => {
           )
       }
       )
+  }
+})
 
-    /*
-    databaseDB.findAllEID()
-      .then(data => {
-        sqlEID = data;
+// [INNOVATE] GET /employeesMongoDB/edit/:eid - edit employee's details from MongoDB
+app.get('/employeesMongoDB/edit/:eid', (req,res) => {
+  databaseDB.findOneFromEID(req.params.eid)
+    .then(data => {
+      let html = ejs.renderFile('views/employeesMongoDB_Edit.ejs', {data: data}, function (err,str){
+        res.send(str);
+      });
+    })
+    .catch(error=>{
+      console.log("Error "+error);
+    })
+})
+
+// [INNOVATE] POST /employees/edit/:eid - post results
+app.post('/employeesMongoDB/edit/:eid', (req, res) => {
+  let eid = req.body._id;
+  let phone = req.body.phone;
+  let email = req.body.email;
+
+  let errorMsg = [];
+  // if phone numebr is not more than 5 chracters
+  if (phone.length < 5) errorMsg.push("Phone must be >5 characters");
+  // check if @ and . exists or not
+  if (!email.includes("@") || !email.includes(".")) errorMsg.push("Email must be a valid email address (@ and . included)");
+
+  if (errorMsg.length > 0){
+    let data = {
+      _id: eid,
+      phone: phone,
+      email: email,
+      errorMsg: errorMsg
+    }
+    ejs.renderFile('views/employeesMongoDB_Edit.ejs', {data: data}, function (err,str){
+      res.send(str);
+      return;});
+  } else {
+    databaseDB.updateEmployee(req.body)
+      .then(
+        res.redirect('/employeesMongoDB')
+      )
+      .catch(error=>{
+        console.log("Error "+error);
       })
-    console.log(sqlEID);*/
-    
   }
 })
 

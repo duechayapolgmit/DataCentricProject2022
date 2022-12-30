@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Employee (MongoDB)</title>
+</head>
+<body>
+    <h1>Edit Employee (MongoDB)</h1>
+    <ul>
+    <%
+        if (data.errorMsg) {
+            data.errorMsg.forEach(function(error){
+        %>
+        
+            <li><%= error %></li>
+        
+        <% })} %>
+    </ul>
+    <form method="POST">
+        <label>EID</label>
+        <input type="text" class="form-control" id="_id" name="_id" readonly value=<%= data._id %>></input><br/>
+        <label>Phone</label>
+        <input type="text" class="form-control" id="phone" name="phone" value=<%= data.phone %>></input><br/>
+        <label>Email</label>
+        <input type="text" class="form-control" id ="email" name="email" value=<%= data.email %>></input><br/>
+        <input type="submit" value="Update"/>
+    </form>
+    <a href="/">Home</a>
+</body>
+</html>

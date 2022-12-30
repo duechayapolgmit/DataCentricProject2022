@@ -52,6 +52,18 @@ module.exports = {
           })
         })
     },
+    // Find an employee based on eid
+    findOneFromEID: function(eid){
+      return new Promise((resolve, reject) => {
+        var cursor = coll.findOne( {"_id":eid}, {} )
+          .then((docs)=>{
+              resolve(docs)
+          })
+          .catch((error)=>{
+              reject(error)
+          })
+        })
+    },
     // Add new document to the collection
     insertNew: function(eid, phone, email){
       return new Promise((resolve, reject) => {
@@ -75,5 +87,23 @@ module.exports = {
               reject(error)
           })
         })
-    }
+    },
+    // INNOVATE - Update an employee
+    updateEmployee: function(data){
+      return new Promise((resolve, reject) => {
+        var cursor = coll.updateOne({_id:data._id},{
+          $set: {
+            _id: data._id,
+            phone: data.phone,
+            email: data.email
+          }
+        })
+            .then((docs)=>{
+                resolve(docs)
+            })
+            .catch((error)=>{
+                reject(error)
+            })
+          })
+        }
 }
