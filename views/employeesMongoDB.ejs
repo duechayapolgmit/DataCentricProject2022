@@ -12,6 +12,7 @@
             <th>Phone</th>
             <th>Email</th>
             <th>Update</th>
+            <th>Delete</th>
         </tr>
         <%
         data.forEach(function(data){
@@ -21,6 +22,7 @@
             <td><%=data.phone %></td>
             <td><%=data.email %></td>
             <td><a href=employeesMongoDB/edit/<%= data._id %>>Update</a></td>
+            <td><a href=employeesMongoDB/delete/<%= data._id %>>Delete</a></td>
         </tr>
         <% }) %>
     </table>

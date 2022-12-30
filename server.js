@@ -336,6 +336,21 @@ app.post('/employeesMongoDB/edit/:eid', (req, res) => {
   }
 })
 
+// [INNOVATE] GET /depts/delete/:did - delete department
+app.get('/employeesMongoDB/delete/:eid', (req, res) => {
+  databaseDB.deleteEmployee(req.params.eid)
+    .then(data => {
+      res.redirect('/employeesMongoDB');
+    })
+    .catch(error=>{
+      let errorMsg = error;
+      ejs.renderFile('views/error.ejs', {data: errorMsg}, function(err, str){
+        res.send(str);
+      })
+    })
+  }
+)
+
 app.listen(port, () => {
     console.log("reading on port "+port);
 })
