@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Employee</title>
+</head>
+<body>
+    <h1>Add Employee</h1>
+    <ul>
+    <%
+        if (data) {
+            data.forEach(function(error){
+        %>
+        
+            <li><%= error %></li>
+        
+        <% })} %>
+    </ul>
+    <form method="POST">
+        <label>EID</label>
+        <input type="text" class="form-control" id="eid" name="eid"></input><br/>
+        <label>Name</label>
+        <input type="text" class="form-control" id="ename" name="ename"></input><br/>
+        <label>Role</label>
+        <input type="text" class="form-control" id ="role" name="role"></input><br/>
+        <label>Salary</label>
+        <input type="text" class="form-control" id="salary" name="salary"></input>
+        <input type="submit" value="Add"/>
+    </form>
+    <a href="/">Home</a>
+</body>
+</html>

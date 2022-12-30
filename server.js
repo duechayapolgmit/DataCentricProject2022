@@ -100,6 +100,81 @@ app.post('/employees/edit/:eid', (req, res) => {
   }
 })
 
+// [INNOVATE] GET /employees/add - add an employee to MySQL database
+app.get('/employees/add', (req, res)=> {
+  data = [];
+  let html = ejs.renderFile('views/employeesAdd.ejs', {data: data}, function(err, str){
+    res.send(str);
+  })
+})
+
+// [INNOVATE] POST /employees/add - add an employee to MySQL database;
+app.post('/employees/add', (req, res)=>{
+  let eid = req.body.eid;
+  let ename = req.body.ename;
+  let role = req.body.role;
+  let salary = req.body.salary;
+
+  let errorMsg = [];
+  // Check eid - must be exactly four characters, start with an E, and no duplicates
+  database.getEID()
+    .then(data => {
+      data.forEach(element => {
+        if (eid == element.eid) errorMsg.push("EID should not already exist in the database");
+      })
+    })
+    .then(data => {
+      // Check name length - more than 5 chars
+      if (ename.length < 5) errorMsg.push("Employee name must be at least 5 characters");
+      // Check role - only Manager or Employee
+      if (!(role == "Manager") && !(role == "Employee")) errorMsg.push("Role can be either Manager or Employee");
+      // Check salary - more than 0
+      if (salary < 0) errorMsg.push("Salary must be > 0");
+
+      // Send back the form if there's an error message
+      if (errorMsg.length > 0){
+        ejs.renderFile('views/employeesAdd.ejs', {data: errorMsg}, function (err,str){
+          res.send(str);
+        })
+      } else {
+        database.addEmployee(eid, ename, role, salary)
+          .then(
+            res.redirect('/employees')
+          )
+      }
+    })
+  
+})
+
+// [INNOVATE] GET /employees/delete - delete an employee in MySQL and MongoDB (if any exists)
+app.get('/employees/delete/:eid', (req, res) => {
+  let eid = req.params.eid;
+
+  // delete employee
+  database.deleteEmployee(eid)
+    .then(data => {
+      // find all eid, to find if the employee exists in mongoDB as well
+      databaseDB.findAllEID()
+        .then(data => {
+          data.forEach(element => {
+            if (element._id == eid){
+              databaseDB.deleteEmployee(eid)
+            }
+          })
+        })
+    })
+    .then(data => {
+      res.redirect('/employees')
+    })
+    .catch(error=>{
+      let errorMsg = eid + " is in a department and can't be deleted"
+      ejs.renderFile('views/error.ejs', {data: errorMsg}, function(err, str){
+        res.send(str);
+      })
+    })
+  }
+)
+
 // GET /depts - show all department's details
 app.get('/depts', (req,res) => {
   database.getDepartments()
@@ -121,7 +196,8 @@ app.get('/depts/delete/:did', (req, res) => {
       res.redirect('/depts');
     })
     .catch(error=>{
-      let html = ejs.renderFile('views/departmentsDeleteError.ejs', {data: req.params.did}, function(err, str){
+      let errorMsg = req.params.did + "has Employees and cannot be deleted"
+      ejs.renderFile('views/error.ejs', {data: errorMsg}, function(err, str){
         res.send(str);
       })
     })

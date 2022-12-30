@@ -52,6 +52,31 @@ module.exports = {
             })
         })
     },
+    // INNOVATE - Add an employee
+    addEmployee: function(eid, name, role, salary){
+        salary = parseFloat(salary)
+        return new Promise((resolve,reject)=>{
+            pool.query('INSERT INTO employee(eid, ename, role, salary) VALUES ('+pmysql.escape(eid)+", "+pmysql.escape(name)+", "+pmysql.escape(role)+" ,"+pmysql.escape(salary)+")")
+            .then(data => {
+                resolve(data)
+            })
+            .catch(error => {
+                reject(error)
+            })
+        })
+    },
+    // INNOVATE - Delete an employee
+    deleteEmployee: function(eid){
+        return new Promise((resolve, reject) => {
+            pool.query('DELETE FROM employee WHERE eid='+pmysql.escape(eid))
+                .then(data => {
+                    resolve(data)
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    },
     // Get departments - for /depts
     getDepartments: function(){
         return new Promise((resolve, reject) => {

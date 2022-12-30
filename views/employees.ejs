@@ -5,6 +5,7 @@
 </head>
 <body>
     <h1>Employees</h1>
+    <a href="/employees/add">Add Employee</a>
     <table border="1">
         <tr>
             <th>ID</th>
@@ -12,6 +13,7 @@
             <th>Role</th>
             <th>Salary</th>
             <th>Update</th>
+            <th>Delete</th>
         </tr>
         <%
         data.forEach(function(data){
@@ -22,6 +24,7 @@
             <td><%=data.role %></td>
             <td><%=data.salary %></td>
             <td><a href=employees/edit/<%= data.eid %>>Update</a></td>
+            <td><a href=employees/delete/<%= data.eid %>>Delete</a></td>
         </tr>
         <% }) %>
     </table>

@@ -26,6 +26,7 @@ MongoClient.connect(
 )
 
 module.exports = {
+    // Find ALL documents in MongoDB
     findAll: function(){
         return new Promise((resolve, reject)=> {
             var cursor = coll.find()
@@ -38,6 +39,7 @@ module.exports = {
                 })
         })
     },
+    // Find ALL EIDs in the collection
     findAllEID: function(){
       return new Promise((resolve, reject) => {
         var cursor = coll.find( {}, {"_id":1} );
@@ -50,9 +52,22 @@ module.exports = {
           })
         })
     },
+    // Add new document to the collection
     insertNew: function(eid, phone, email){
       return new Promise((resolve, reject) => {
         var cursor = coll.insertOne({_id: eid, phone: phone, email: email})
+          .then((docs)=>{
+              resolve(docs)
+          })
+          .catch((error)=>{
+              reject(error)
+          })
+        })
+    },
+    // INNOVATE - Delete a document in the collection
+    deleteEmployee: function(eid){
+      return new Promise((resolve, reject) => {
+        var cursor = coll.deleteOne({_id:eid})
           .then((docs)=>{
               resolve(docs)
           })
