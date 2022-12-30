@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Employees Details</title>
+</head>
+<body>
+    <h1>Employees Details (MySQL and MongoDB)</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Salary</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+        <%
+        data.forEach(function(data){
+        %>
+        <tr>
+            <td><%=data.eid %></td>
+            <td><%=data.ename %></td>
+            <td><%=data.role %></td>
+            <td><%=data.salary %></td>
+            <td><%=data.phone %></td>
+            <td><%=data.email %></td>
+        </tr>
+        <% }) %>
+    </table>
+    <a href="/">Home</a>
+</body>
+</html>

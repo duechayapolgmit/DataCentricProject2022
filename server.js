@@ -30,6 +30,7 @@ app.get('/', (req,res) => {
   let html = "<html><body><a href=\"/employees\">Employees</a><br/>";
   html += "<a href=\"/depts\">Departments</a><br/>";
   html += "<a href=\"/employeesMongoDB\">Employees (MongoDB)</a><br/></html>";
+  html += "<a href=\"/employeesDetails\">Employees All Details (MySQL and MongoDB)</a><br/></html>";
   res.send(html)
 })
 
@@ -89,10 +90,10 @@ app.post('/employees/edit/:eid', (req, res) => {
         console.log("Error "+error);
       })
   } else {
-    console.log('success')
     database.setEmployee(eid, name, role, salary)
-      .then(
+      .then( d => {
         res.redirect('/employees')
+      }
       )
       .catch(error=>{
         console.log("Error "+error);
@@ -138,8 +139,9 @@ app.post('/employees/add', (req, res)=>{
         })
       } else {
         database.addEmployee(eid, ename, role, salary)
-          .then(
-            res.redirect('/employees')
+          .then(e => {
+            res.redirect('/employees');
+          }
           )
       }
     })
@@ -196,7 +198,7 @@ app.get('/depts/delete/:did', (req, res) => {
       res.redirect('/depts');
     })
     .catch(error=>{
-      let errorMsg = req.params.did + "has Employees and cannot be deleted"
+      let errorMsg = req.params.did + " has Employees and cannot be deleted"
       ejs.renderFile('views/error.ejs', {data: errorMsg}, function(err, str){
         res.send(str);
       })
@@ -350,6 +352,46 @@ app.get('/employeesMongoDB/delete/:eid', (req, res) => {
     })
   }
 )
+
+/* COMBINATION */
+// [INNOVATE] GET /employeesDetails - get all employee details from both databases
+app.get('/employeesDetails',(req,res) => {
+  let dataAll = [];
+  // GET ALL EMPLOYEES
+  database.getEmployees()
+    .then(dataSQL => {
+      // for each employee, get data from MongoDB
+      dataSQL.forEach(element => {
+        databaseDB.findOneFromEID(element.eid)
+          .then(dataDB => {
+            // default values
+            let data = {
+              eid: element.eid,
+                ename: element.ename,
+                role: element.role,
+                salary: element.salary,
+                phone: 0,
+                email: ''
+            };
+            // if there is data from MongoDB, set phone and email to them
+            if (dataDB != null){
+              data.phone = dataDB.phone;
+              data.email = dataDB.email;
+            }
+            dataAll.push(data);
+            if (dataAll.length == dataSQL.length) { // if all complete (arrays have same length)
+              console.log(dataAll)
+              ejs.renderFile('views/employeesDetails.ejs', {data: dataAll}, function(err, str){
+                res.send(str);
+              })
+            }
+          })
+        })
+    })
+    .catch(error=>{
+      console.log("Error: "+error);
+    })
+})
 
 app.listen(port, () => {
     console.log("reading on port "+port);
